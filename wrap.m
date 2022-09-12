@@ -1,4 +1,5 @@
 function wx = wrap(x,n)
+% wx = wrap(x,n)
 % Wrap x around n.
 % Example:
 % 1 = wrap(1,3)
