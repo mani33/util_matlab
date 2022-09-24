@@ -12,19 +12,22 @@ function [wps,Fc_vec,Fb_vec,sf] = get_waveletps(data_vec,freq_begin,freq_end,fs,
 %           Fb_vec - vector of time decay parameters
 %           sf - vector of std of freq domain Gaussian of the wavelets
 
-args.freq_std_scaling_meth = 'log';
+args.freq_std_scaling_meth = 'log'; % log, linear, custom
 args.freq_std_begin = 0.1250;
 args.freq_std_end = 2.5000;
-args.freq_scaling_meth = 'log';
+args.freq_scaling_meth = 'log'; % log, linear, custom
+args.custom_freq_vec = []; % if the freq_scaling_meth is 'custom' then, this field must be supplied
+args.custom_freq_std_vec = []; % if the freq_std_scaling_meth is 'custom' then, this field must be supplied
 args.nfreq = 30;
 args.wave_halfwidth = 2.5000;
+args = parse_var_args(args,varargin{:});
 
 N = length(data_vec(:));
 % Get Fc - center frequencies for the wavelets
-Fc_vec = get_Fc(freq_begin,freq_end,args.freq_scaling_meth,args.nfreq);
+Fc_vec = get_Fc(freq_begin,freq_end,args.freq_scaling_meth,args.nfreq,args);
 
 % Get the time decay parameter Fb
-[Fb_vec,sf] = get_Fb(args.freq_std_begin,args.freq_std_end,args.freq_std_scaling_meth,args.nfreq);
+[Fb_vec,sf] = get_Fb(args.freq_std_begin,args.freq_std_end,args.freq_std_scaling_meth,args.nfreq,args);
 
 % Compute number of samples for the wavelet
 wave_nsamples = 2*round(args.wave_halfwidth*fs)+1; % make sure it is odd number
@@ -76,7 +79,7 @@ function [wt,t] = get_wavelet(LB,UB,N,Fb,Fc)
 t = linspace(LB,UB,N)';
 wt = (1/sqrt(pi*Fb))*exp((1i*2*pi*Fc*t)-((t.^2)/Fb));
 
-function Fc_vec = get_Fc(freq_begin,freq_end,freq_scaling_meth,nfreq)
+function Fc_vec = get_Fc(freq_begin,freq_end,freq_scaling_meth,nfreq,args)
 % Fc_vec = get_Fc(freq_begin,freq_end,freq_scaling_meth)
 % Get the center frequencies for the wavelets
 fbound = [freq_begin,freq_end];
@@ -85,11 +88,13 @@ switch freq_scaling_meth
         Fc_vec = logspace(log10(fbound(1)),log10(fbound(2)),nfreq);
     case 'linear'
         Fc_vec = linspace(fbound(1),fbound(2),nfreq);
+    case 'custom'
+        Fc_vec = args.custom_freq_vec;
     otherwise
         error('Unknown method')
 end
 
-function [Fb_vec,sf] = get_Fb(freq_std_begin,freq_std_end,freq_std_scaling_meth,nfreq)
+function [Fb_vec,sf] = get_Fb(freq_std_begin,freq_std_end,freq_std_scaling_meth,nfreq,args)
 % [Fb_vec,sf] = get_Fb()
 % Get the time decay parameter (Fb) set for the wavelets. Also return wavelets'
 % frequency domain Gaussian's standard deviation that depends on Fb.
@@ -104,10 +109,11 @@ fbound = [freq_std_begin,freq_std_end];
 switch freq_std_scaling_meth
     case 'log'
         sf = logspace(log10(fbound(1)),log10(fbound(2)),nfreq);
-        Fb_vec = 1./(2*(pi*sf).^2);
     case 'linear'
         sf = linspace(fbound(1),fbound(2),nfreq);
-        Fb_vec = 1./(2*(pi*sf).^2);
+    case  'custom'
+        sf = args.custom_freq_std_vec;        
     otherwise
         error('Unknown method')
 end
+Fb_vec = 1./(2*(pi*sf).^2);
