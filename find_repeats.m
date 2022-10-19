@@ -1,7 +1,7 @@
 function [start_ind, end_ind] = find_repeats(x, b, splice_gap)
 % [start_ind, end_ind] = find_repeats(x, b, splice_gap)
 % Find the starting and ending indices of subarrays where a given value (b)
-% is repeated in the vector x. 
+% is repeated in the vector x. Set b = NaN if repeats of NaN's is desired.
 % 
 % Note that single occurrence of b with non-b values before and after will 
 % also be included in finding. See Example1 below. Such occurrences will 
@@ -13,6 +13,9 @@ function [start_ind, end_ind] = find_repeats(x, b, splice_gap)
 % indices of the end of one segment and the beginning of the next segment; 
 % therefore, the number of elements in between the apposing edges will be 
 % splice_gap-1.
+%
+% Example 0: find_repeats([1 0 0 NaN NaN NaN 0 1 0 0], NaN) will return 
+% start_ind = [1,4,8] and end_ind = [1,6,8] as indices of repetitions of NaN.
 %
 % Example 1: find_repeats([1 0 0 1 1 1 0 1 0 0], 1) will return 
 % start_ind = [1,4,8] and end_ind = [1,6,8] as indices of repetitions of 1.
@@ -37,7 +40,13 @@ end
 % Cast input as row vector
 x = x(:)';
 
-xb_ind = find(x==b);
+%  Sometimes, user may want detect location of NaN
+if isnan(b)
+    xb_ind = find(isnan(x));
+else
+    xb_ind = find(x==b);
+end
+
 
 if ~isempty(xb_ind)
     di_spliced = diff(xb_ind);    

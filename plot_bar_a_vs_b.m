@@ -1,17 +1,29 @@
 function varargout = plot_bar_a_vs_b(adata,bdata,condStr,varargin)
-args.col_a = 'k';
-args.col_b = 'k';
-args.ylabel = '';
+args.axis_off = false;
+args.face_alpha = 1;
+args.bar_width = 0.8;
 args.show_stat = false;
 args.title = '';
 args.boxplot = 0;
-args.FontSize = 11;
+args.FontSize = 9;
 args.paired = false;
 args.show_legend = false;
 args.xlim = [0 3];
 args.ylim = [];
+args.ylabel = '';
+args.ylabel_col = 'k';
+args.xlabel_col = 'k';
 args.face_col1 = [0.8 0.8 0.8];
 args.face_col2 = [1 0 0];
+args.edge_col1 = [0,0,0];
+args.edge_col2 = [0,0,0];
+args.errorbar_col = 'k';
+args.xcolor = 'k'; % x-spine
+args.ycolor = 'k';
+args.marker = 'O';
+args.marker_size = 6;
+args.marker_face_col = 'none';
+args.marker_edge_col = 'k';
 args.jitter = 0.015;
 args = parse_var_args(args,varargin{:});
 adata = adata(:);
@@ -30,13 +42,11 @@ zb(1:2:end) = -1*args.jitter;
 if args.boxplot
     boxplot([adata bdata],'labels',condStr,'notch','off')
 else
-    x = bar(1,m(1),args.col_a);
-    set(x,'facecolor',args.face_col1,'linewidth',1)
+    x = bar(1,m(1),args.bar_width,'FaceAlpha',args.face_alpha);
+    set(x,'facecolor',args.face_col1,'linewidth',1,'edgeColor',args.edge_col1)
     hold on
     
-    y = bar(2,m(2),args.col_b);
-    set(y,'facecolor',args.face_col2,'linewidth',1);
-    errorbar([1,2],m,se,'linestyle','none','color','k')
+    y = bar(2,m(2),args.bar_width,'FaceAlpha',args.face_alpha);    
     
     xlim(args.xlim)
     if ~isempty(args.ylim)
@@ -48,9 +58,12 @@ else
         Y = [adata bdata];
         plot(X',Y','kO-','markerfacecolor','k')
     else
-        plot(ones(1,lena)+za, sort(adata),'O','color','k','markerfacecolor','none')
-        plot(2*ones(1,lenb)+zb, sort(bdata),'O','color','k','markerfacecolor','none')
+        plot(ones(1,lena)+za, sort(adata),args.marker,'color',args.marker_edge_col,'markerfacecolor',args.marker_face_col,'MarkerSize',args.marker_size)
+        plot(2*ones(1,lenb)+zb, sort(bdata),args.marker,'color',args.marker_edge_col,'markerfacecolor',args.marker_face_col,'MarkerSize',args.marker_size)
     end
+    % Draw error bar at end so it is overlaid on data points
+    set(y,'facecolor',args.face_col2,'linewidth',1,'edgeColor',args.edge_col2)
+    errorbar([1,2],m,se,'linestyle','none','color',args.errorbar_col,'linewidth',1)
 end
 hold on
 if args.paired
@@ -58,7 +71,7 @@ if args.paired
     Y = [adata bdata];
     plot(X',Y','kO-','markerfacecolor','k')
 end
-set(gca,'linewidth',1,'fontsize',13)
+set(gca,'linewidth',1,'fontsize',args.FontSize)
 box off
 if args.show_legend
     leg = legend([x,y],condStr);
@@ -73,10 +86,15 @@ if args.show_stat
     yl = max([adata(:)' bdata(:)']);
     text(0.25,0.95*yl,sprintf('n = %0.0f,%0.0f;  p = %0.2f',lena,lenb,p))
 end
-ylabel(args.ylabel)
-set(gca,'xtick',[1 2],'xticklabel',condStr,'FontSize',args.FontSize)
+set(gca,'XColor',args.xcolor,'YColor',args.ycolor)
+ylabel(args.ylabel,'Color',args.ylabel_col)
+set(gca,'xtick',[1 2],'xticklabel',condStr)
 title(args.title,'FontWeight','normal','FontSize',args.FontSize)
-
+if args.axis_off
+    axis off
+else
+    axis on
+end
 if nargout
     varargout{1} = gca;
 end

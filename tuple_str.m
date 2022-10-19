@@ -1,5 +1,8 @@
 function s = tuple_str(v,n_decimals)
-% make a tuple string s (e.g.: '(1,2,3)') from the input vector v(e.g.[1,2,3]). v can have one element.
+% function s = tuple_str(v,n_decimals). Make a tuple string s (e.g.: '(1,2,3)') 
+% from the input vector v(e.g.[1,2,3]) with a given number of decimals. 
+% v can have one element.
+%
 % Mani Subramaniyan 2022-06-13
 
 if nargin < 2
