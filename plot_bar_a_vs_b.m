@@ -18,6 +18,7 @@ args.face_col2 = [1 0 0];
 args.edge_col1 = [0,0,0];
 args.edge_col2 = [0,0,0];
 args.errorbar_col = 'k';
+args.line_width = 1;
 args.xcolor = 'k'; % x-spine
 args.ycolor = 'k';
 args.marker = 'O';
@@ -42,11 +43,11 @@ zb(1:2:end) = -1*args.jitter;
 if args.boxplot
     boxplot([adata bdata],'labels',condStr,'notch','off')
 else
-    x = bar(1,m(1),args.bar_width,'FaceAlpha',args.face_alpha);
-    set(x,'facecolor',args.face_col1,'linewidth',1,'edgeColor',args.edge_col1)
+    x = bar(1,m(1),args.bar_width,'FaceAlpha',args.face_alpha,'linewidth',args.line_width);
+    set(x,'facecolor',args.face_col1,'edgeColor',args.edge_col1)
     hold on
     
-    y = bar(2,m(2),args.bar_width,'FaceAlpha',args.face_alpha);    
+    y = bar(2,m(2),args.bar_width,'FaceAlpha',args.face_alpha,'LineWidth',args.line_width);    
     
     xlim(args.xlim)
     if ~isempty(args.ylim)
@@ -62,8 +63,8 @@ else
         plot(2*ones(1,lenb)+zb, sort(bdata),args.marker,'color',args.marker_edge_col,'markerfacecolor',args.marker_face_col,'MarkerSize',args.marker_size)
     end
     % Draw error bar at end so it is overlaid on data points
-    set(y,'facecolor',args.face_col2,'linewidth',1,'edgeColor',args.edge_col2)
-    errorbar([1,2],m,se,'linestyle','none','color',args.errorbar_col,'linewidth',1)
+    set(y,'facecolor',args.face_col2,'edgeColor',args.edge_col2)
+    errorbar([1,2],m,se,'linestyle','none','color',args.errorbar_col,'linewidth',args.line_width)
 end
 hold on
 if args.paired
@@ -71,7 +72,7 @@ if args.paired
     Y = [adata bdata];
     plot(X',Y','kO-','markerfacecolor','k')
 end
-set(gca,'linewidth',1,'fontsize',args.FontSize)
+set(gca,'linewidth',args.line_width,'fontsize',args.FontSize)
 box off
 if args.show_legend
     leg = legend([x,y],condStr);
