@@ -12,7 +12,7 @@ args = parse_var_args(args,varargin{:});
 
 axes_obj = findobj(fig_obj,'Type','Axes');
   % Exclude suptitle which shows up as Axes
-st_ax = arrayfun(@(x) strcmp(x.Tag,'suptitle'),axes_obj);
+st_ax = arrayfun(@(x) any(strcmp(x.Tag,{'suptitle','suplabel'})),axes_obj);
 axes_obj = axes_obj(~st_ax);
 
 fields = fieldnames(args);

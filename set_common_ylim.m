@@ -1,13 +1,13 @@
-function set_common_ylim(fig_obj,common_ylimit,r,c)
+function set_common_ylim(fig_handles,common_ylimit,r,c)
 % set_common_ylim(fig_obj,ylim) - set the ylimit of all the axes objects
 % within the figure handle (fig_obj) the given values (ylim). By default,
 % the ylimit will be set for all subplots. Optionally either rows or
 % columns can be set to the given ylimit; you can't set both rows and
-% columns. 
+% columns.
 %
 % Warning: This function assumes that all the subplots are of the same size.
 % If not, unexpected behavior may arise.
-% 
+%
 % Example1
 % set_common_ylim(gcf,[0 10]) - sets all subplots ylimit to [0 10]
 % for the current figure.
@@ -35,48 +35,51 @@ end
 
 cond = (isempty(r) & isempty(c)) | (~isempty(r) & isempty(c)) | (isempty(r) & ~isempty(c));
 assert(cond, 'You can set either the row or the column, not both')
+nFig = length(fig_handles);
+for iFig = 1:nFig
+    figure(fig_handles(iFig)) 
+    axes_obj = findobj(gcf,'Type','Axes');
+    % Exclude suptitle which shows up as Axes
+    st_ax = arrayfun(@(x) any(strcmp(x.Tag,{'suptitle','suplabel'})),axes_obj);
+    axes_obj = axes_obj(~st_ax);
+    % Go to each axes object and move text objects to the same relative
+    % position after altering ylimit
+    %
+    % By default, we will set ylimit for all subplots.
+    axes_obj = select_axes(axes_obj,r,c);
 
-axes_obj = findobj(fig_obj,'Type','Axes');
-  % Exclude suptitle which shows up as Axes
-st_ax = arrayfun(@(x) strcmp(x.Tag,'suptitle'),axes_obj);
-axes_obj = axes_obj(~st_ax);
-% Go to each axes object and move text objects to the same relative
-% position after altering ylimit
-%
-% By default, we will set ylimit for all subplots.
-axes_obj = select_axes(axes_obj,r,c);
-
-nAx = length(axes_obj);
-for iAx = 1:nAx
-    ax = axes_obj(iAx);  
-    yv = get(ax,'ylim');
-    % Any text objects? If yes, get their original y-coordinates to that we
-    % can place them back in an equivalent y-position after chaning ylim.
-    tob = findobj(ax,'Type','text');
-    nTx = length(tob);
-    y_rel = nan(nTx,1);
-    for iTx = 1:nTx
-        p = get(tob(iTx),'Position'); % [x,y,z]
-        % original relative position
-        d = diff(yv);
-        y_rel(iTx) = (p(2)-yv(1))/d;
+    nAx = length(axes_obj);
+    for iAx = 1:nAx
+        ax = axes_obj(iAx);
+        yv = get(ax,'ylim');
+        % Any text objects? If yes, get their original y-coordinates to that we
+        % can place them back in an equivalent y-position after chaning ylim.
+        tob = findobj(ax,'Type','text');
+        nTx = length(tob);
+        y_rel = nan(nTx,1);
+        for iTx = 1:nTx
+            p = get(tob(iTx),'Position'); % [x,y,z]
+            % original relative position
+            d = diff(yv);
+            y_rel(iTx) = (p(2)-yv(1))/d;
+        end
+        % Alter ylimit
+        % Clever(!#$) matlab also will alter the xlimit depending on the remaining
+        % data points visibile within the new ylimit. So, we need to keep
+        % xlimit.
+        xv = get(ax,'xlim');
+        set(ax,'ylim',common_ylimit)
+        set(ax,'xlim',xv);
+        % Reset text positions
+        for iTx = 1:nTx
+            p = get(tob(iTx),'Position');
+            new_y = common_ylimit(1)+diff(common_ylimit)*y_rel(iTx);
+            new_pos = [p(1) new_y p(3)];
+            set(tob(iTx),'Position',new_pos)
+        end
     end
-    % Alter ylimit
-    % Clever(!#$) matlab also will alter the xlimit depending on the remaining
-    % data points visibile within the new ylimit. So, we need to keep
-    % xlimit.
-    xv = get(ax,'xlim');
-    set(ax,'ylim',common_ylimit)
-    set(ax,'xlim',xv);
-    % Reset text positions
-    for iTx = 1:nTx
-        p = get(tob(iTx),'Position');
-        new_y = common_ylimit(1)+diff(common_ylimit)*y_rel(iTx);
-        new_pos = [p(1) new_y p(3)];
-        set(tob(iTx),'Position',new_pos)
-    end
+    shg
 end
-shg
 
 function sel_axes = select_axes(axes_obj,r,c)
 if (isempty(r) && isempty(c))
