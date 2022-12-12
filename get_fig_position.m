@@ -18,7 +18,7 @@ function varargout = get_fig_position()
 %-----------------------------------------------------------------------------------------
 p = get(gcf,'Position');
 s = mat2str(p);
-s = sprintf('set(gcf,"Position",%s)',s);
+s = sprintf('set(gcf,"Position",%s,"color","w")',s);
 disp(s);
 clipboard('copy',s);
 if nargout

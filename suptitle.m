@@ -11,6 +11,7 @@ function hout=suptitle(str,varargin)
 
 % Parameters used to position the supertitle.
 args.FontSize = 12;
+args.Interpreter = 'latex';
 args = parse_var_args(args,varargin{:});
 % Amount of the figure window devoted to subplots
 plotregion = .90;
@@ -94,7 +95,7 @@ if (oldtitle~=0),
 	delete(oldtitle);
 end
 ha=axes('pos',[0 1 1 1],'visible','off','Tag','suptitle');
-ht=text(.5,titleypos-1,str);
+ht=text(.5,titleypos-1,str,'Interpreter',args.Interpreter);
 set(ht,'horizontalalignment','center','fontsize',fs,'FontWeight','Bold');
 set(gcf,'nextplot',np);
 axes(haold);
