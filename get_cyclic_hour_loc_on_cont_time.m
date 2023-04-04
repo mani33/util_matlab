@@ -1,5 +1,5 @@
-function [locs,hours] = get_cyclic_hour_loc_on_cont_time(ct_start,ct_end,hour_of_day,first_loc_only,varargin)
-% function locs = get_cyclic_hour_loc_on_cont_time(ct_start,ct_end,hour_of_day,first_loc_only)
+function [ct_hour_of_day,hours] = get_cyclic_hour_loc_on_cont_time(ct_start,ct_end,hour_of_day,first_loc_only,varargin)
+% function ct_hour_of_day = get_cyclic_hour_loc_on_cont_time(ct_start,ct_end,hour_of_day,first_loc_only)
 % Get the cyclic locations corresponding to a given hour of day on a 
 % continuous time spanning across several days. Useful for plotting 
 % specific time points in sleep studies where continuous time is used for 
@@ -11,6 +11,11 @@ function [locs,hours] = get_cyclic_hour_loc_on_cont_time(ct_start,ct_end,hour_of
 % hour_of_day - hour of the day in 24h format that you want to find the
 % location on the continuous hour range (between ct_start and ct_end)
 % first_loc_only - return only the first of the hour locations
+%
+% Outputs:
+%   ct_hour_of_day - continuous times corresponding to the requested
+%   cyclic hour_of_day
+%   hours - hours corresponding to given hour_of_day
 %
 % Mani Subramaniyan 2023-03-23
 args.day_start_hour = 0; % must be 0 or 24; 0 or 24 for marking day start
@@ -26,9 +31,9 @@ nHourOfDay = length(hour_of_day);
 d = struct;
 for iHod = 1:nHourOfDay
     chour_of_day = hour_of_day(iHod);
-    locs = (win_start_day:win_end_day)*24 + chour_of_day;
+    ct_hour_of_day = (win_start_day:win_end_day)*24 + chour_of_day;
     % Trim
-    c_locs = locs(locs >= ct_start & locs <= ct_end);
+    c_locs = ct_hour_of_day(ct_hour_of_day >= ct_start & ct_hour_of_day <= ct_end);
     c_hours = repmat(chour_of_day,1,length(c_locs));
     d.locs{iHod} = c_locs;
     d.hours{iHod} = c_hours;
@@ -40,7 +45,7 @@ end
 % Pool and sort
 all_locs = [d.locs{:}];
 all_hours = [d.hours{:}];
-[locs,ind] = sort(all_locs);
+[ct_hour_of_day,ind] = sort(all_locs);
 hours = all_hours(ind);
 if args.day_start_hour==0
     hours(hours==24) = 0;
