@@ -1,4 +1,4 @@
-function [ax,h]=suplabel(text,whichLabel,supAxes)
+function varargout=suplabel(text,whichLabel,supAxes)
 % PLaces text as a title, xlabel, or ylabel on a group of subplots.
 % Returns a handle to the label and a handle to the axis.
 %  [ax,h]=suplabel(text,whichLabel,supAxes)
@@ -30,12 +30,11 @@ function [ax,h]=suplabel(text,whichLabel,supAxes)
 % SEE ALSO: text, title, xlabel, ylabel, zlabel, subplot,
 %           suptitle (Matlab Central)
 
-% Author: Ben Barrowes <barrowes@alum.mit.edu>
+% Authors: Ben Barrowes <barrowes@alum.mit.edu>/Mani Subramaniyan
 
 %modified 3/16/2010 by IJW to make axis behavior re "zoom" on exit same as
 %at beginning. Requires adding tag to the invisible axes
 %modified 8/8/2018 to allow cells as text for multiline capability
-
 
 currax=findobj(gcf,'type','axes','-not','tag',{'suplabel','suptitle'});
 
@@ -93,4 +92,10 @@ elseif strcmp('x',whichLabel)
     h=get(ax,'XLabel');
 elseif strcmp('y',whichLabel) || strcmp('yy',whichLabel)
     h=get(ax,'YLabel');
+end
+if nargout==1
+    varargout{1}=ax;
+elseif nargout==2
+    varargout{1} = ax;
+    varargout{2} = h;
 end
